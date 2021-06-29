@@ -1,0 +1,17 @@
+
+# Ignore folders
+__pycache__/
+.vscode/
+env/
+
+
+# Ignore extensions
+*.h5
+*.csv
+*.jpg
+*.png
+*.pdf
+*.sh
+*.svg
+*.pickle
+
