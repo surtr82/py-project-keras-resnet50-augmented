@@ -3,16 +3,15 @@ from numpy import array, mean
 import matplotlib.pyplot as plt
 import os
 import pandas
-from tensorflow import keras
-from keras.applications import ResNet50
-from keras.applications.resnet50 import preprocess_input
-from keras.callbacks import EarlyStopping, ModelCheckpoint
-from keras.layers import MaxPooling2D, Dense, Dropout, Flatten
-from keras.models import load_model, Model
-from keras.optimizers import Adam	
-from keras.preprocessing.image import ImageDataGenerator
-from keras.preprocessing import image
-from keras.utils import plot_model
+from tensorflow.keras.applications.resnet import ResNet50
+from tensorflow.keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.layers import MaxPooling2D, Dense, Dropout, Flatten
+from tensorflow.keras.models import load_model, Model
+from tensorflow.keras.optimizers import Adam	
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.utils import plot_model
 
 
 # Load required py-scripts
