@@ -7,7 +7,7 @@ from cv2 import cv2
 import numpy as np
 from keras import backend as K
 from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input
+from tensorflow.keras.applications.resnet50 import preprocess_input
 import tensorflow as tf
 from matplotlib import pyplot as plt
 import os
