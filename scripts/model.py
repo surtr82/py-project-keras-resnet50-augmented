@@ -175,7 +175,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Construct new head
     modelHead = modelBase.output
-    modelHead = MaxPooling2D(pool_size=(7, 7))(modelHead)
+    modelHead = MaxPooling2D(pool_size=(2, 2))(modelHead)
     modelHead = Flatten(name="flatten")(modelHead)
     modelHead = Dense(256, activation="relu")(modelHead)
     modelHead = Dropout(0.5)(modelHead)
