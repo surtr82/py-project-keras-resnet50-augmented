@@ -173,23 +173,25 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     # Get resnet50 model base
     modelBase = getModelBase(width, height, depth)
 
-    # Construct new head
-    modelHead = modelBase.output
-    modelHead = MaxPooling2D(pool_size=(2, 2))(modelHead)
-    modelHead = Flatten(name="flatten")(modelHead)
-    modelHead = Dense(256, activation="relu")(modelHead)
-    modelHead = Dropout(0.5)(modelHead)
-    modelHead = Dense(1, activation="sigmoid")(modelHead)
-
-    # Place head on base model
-    model = Model(inputs=modelBase.input, outputs=modelHead)
-
     # Freeze layers of base model which wont get updated during training
     freezeLayers = 143
     for layer in modelBase.layers[:freezeLayers]:
         layer.trainable = False
     for layer in modelBase.layers[freezeLayers:]:
         layer.trainable = True
+
+    # Construct new head
+    modelHead = modelBase.output
+    modelHead = MaxPooling2D(pool_size=(2, 2))(modelHead)
+    modelHead = Flatten(name="flatten")(modelHead)
+    modelHead = Dense(256, activation="relu")(modelHead)
+    modelHead = Dropout(0.2)(modelHead)
+    modelHead = Dense(256, activation="relu")(modelHead)
+    modelHead = Dropout(0.2)(modelHead)
+    modelHead = Dense(1, activation="sigmoid")(modelHead)
+
+    # Place head on base model
+    model = Model(inputs=modelBase.input, outputs=modelHead)
 
     # Compile the model
     model.compile(
@@ -199,7 +201,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     )
 
     # Train the model with early stopping
-    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=10)
+    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=20)
     checkpointCallback = ModelCheckpoint('output/train/model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
     history = model.fit_generator(
