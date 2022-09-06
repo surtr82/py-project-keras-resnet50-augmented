@@ -201,7 +201,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     )
 
     # Train the model with early stopping
-    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=20)
+    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=10)
     checkpointCallback = ModelCheckpoint('output/train/model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
     history = model.fit_generator(
