@@ -1,5 +1,5 @@
 # Load required modules
-from cv2 import cv2
+import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 import os
@@ -55,9 +55,9 @@ def visualizeGradCam(model, layerName, filePath, width, height, outputPredictDir
     
 
 def loadImage(filePath, width, height, preprocess=True):
-    img = image.load_img(filePath, target_size=(width, height))
+    img = tf.keras.utils.load_img(filePath, target_size=(width, height))
     if preprocess:
-        img = image.img_to_array(img)
+        img = tf.keras.utils.img_to_array(img)
         img = np.expand_dims(img, axis=0)
         img = preprocess_input(img)
     return img

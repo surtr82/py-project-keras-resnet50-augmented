@@ -8,13 +8,13 @@ from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import MaxPooling2D, Dense, Dropout, Flatten
 from tensorflow.keras.models import load_model, Model
-from tensorflow.keras.optimizers import Adam	
+from tensorflow.keras.optimizers.legacy import Adam	
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
 
 # Load required scripts
 from scripts.config import readConfigFile, getWidth, getHeight, getDepth, getBatchSize
-from scripts.file import getFiles, getFilesIncludingSubdirectories, getDirectories, createDirectory, deleteSubdirectories
+from scripts.file import getDirectories, createDirectory, deleteSubdirectories
 from scripts.hist import histPrediction, histPredictionTest
 
 
@@ -50,8 +50,7 @@ def trainModelDefault():
 
 
 def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize):
-    # Define the ImageNet mean subtraction (in RGB order) and set the
-    # the mean subtraction value for each of the data augmentation objects
+    # ImageNet mean subtraction
     mean = array([123.68, 116.779, 103.939], dtype="float32")
 
     # Process train files
@@ -94,7 +93,7 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
     )
 
     # Define steps per epoch
-    epochs = 100
+    epochs = 20
     trainStepsPerEpoch = int(trainData.n / batchSize)
     validateStepsPerEpcoh = int(validateData.n / batchSize)     
 
@@ -120,10 +119,6 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
     plt.legend(['Train', 'Validate'], loc='upper left')
     plt.savefig(os.path.join(outputValidateDirectory, 'model_loss.pdf'))
     plt.close()
-    
-    # Save model
-    # filePath = os.path.join(outputTrainDirectory, "model.h5")
-    # model.save(filePath)
 
     return model
 
@@ -154,13 +149,13 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(learning_rate=1e-4),
+        optimizer = Adam(learning_rate=1e-5),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
 
     # Train the model with early stopping
-    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=5)
+    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=10)
     checkpointCallback = ModelCheckpoint('output/train/model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
     history = model.fit(
