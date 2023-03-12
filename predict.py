@@ -1,22 +1,27 @@
-# Load py-scripts
+# Load required modules
+import tensorflow as tf
+
+# Load required scripts
 from scripts.config import initConfigFile
 from scripts.model import loadModelDefault, predictFilesDefault
+from scripts.visualizePrediction import visualizePredictionsDefault
 
 
 def main():
-    """main
-
-    """
     # Init config file
     initConfigFile()
     
-    # Get base and load trained model
-    model = loadModelDefault()
+    # # Get base and load trained model
+    # model = loadModelDefault()
 
-    # Predict test files
-    predictFilesDefault(model)
+    # # Predict test files
+    # predictFilesDefault(model)
+
+    # Visualize positive predictions
+    visualizePredictionsDefault()
 
 
 # Execute main routine
 if __name__ == '__main__':
+    tf.compat.v1.disable_eager_execution()
     main()

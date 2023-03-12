@@ -1,28 +1,22 @@
-# Load required packages
+# Load required modules
 import math
 import os
 import random
 import shutil
 
 
-# Load required py-scripts
+# Load required scripts
 from scripts.config import readConfigFile, getNoOfTestFiles, getPercentageOfValidationFiles, useShuffledFiles, getBatchSize, getMaxFiles
-from scripts.file import getFiles, getFilesIncludingSubdirectories, copyFiles, moveFiles, getDirectories, createDirectory, deleteSubdirectories
+from scripts.file import getFiles, copyFiles, moveFiles, getDirectories, createDirectory, deleteSubdirectories
 
 
 def recreateDatasetDefault():
-    """recreateDatasetDefault
-
-    """ 
     recreateTrainAndTestDataDefault()
     recreateValidationDataDefault()
     recreatePredictDataDefault()
 
 
 def recreateTrainAndTestDataDefault():
-    """createTrainAndTestDataDefault
-
-    """      
     # Get default values
     inputTrainDirectory = readConfigFile("DIRECTORY", "inputTrain")
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
@@ -35,22 +29,11 @@ def recreateTrainAndTestDataDefault():
 
 
 def recreateTrainAndTestData(inputTrainDirectory, datasetTrainDirectory, datasetTestDirectory, noOfTestFiles, shuffleFiles):
-    """createTrainAndTestData
-        Arguments:
-            inputTrainDirectory: Input train directory
-            datasetTrainDirectory: Dataset train directory
-            datasetTestDirectory: Dataset test directory
-            noOfTestFiles: Number of test files to separate
-            shuffleFiles: Shuffle files before splitting test files
-    """      
     deleteTrainAndTestData(datasetTrainDirectory, datasetTestDirectory)
     createTrainAndTestData(inputTrainDirectory, datasetTrainDirectory, datasetTestDirectory, noOfTestFiles, shuffleFiles)
 
 
 def deleteTrainAndTestDataDefault():
-    """deleteTrainAndTestDataDefault
-
-    """   
     # Get default values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetTestDirectory =  readConfigFile("DIRECTORY", "datasetTest")    
@@ -60,19 +43,11 @@ def deleteTrainAndTestDataDefault():
 
 
 def deleteTrainAndTestData(datasetTrainDirectory, datasetTestDirectory):
-    """deleteTrainAndTestData
-        Arguments:
-            datasetTrainDirectory: Dataset train directory
-            datasetTestDirectory: Dataset test directory        
-    """      
     deleteSubdirectories(datasetTrainDirectory)
     deleteSubdirectories(datasetTestDirectory)
 
 
 def createTrainAndTestDataDefault():
-    """createTrainAndTestDataDefault
-
-    """      
     # Get default values
     inputTrainDirectory = readConfigFile("DIRECTORY", "inputTrain")
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
@@ -85,14 +60,6 @@ def createTrainAndTestDataDefault():
 
 
 def createTrainAndTestData(inputTrainDirectory, datasetTrainDirectory, datasetTestDirectory, noOfTestFiles, shuffleFiles):
-    """createTrainAndTestData
-        Arguments:
-            inputTrainDirectory: Input train directory
-            datasetTrainDirectory: Dataset train directory
-            datasetTestDirectory: Dataset test directory
-            noOfTestFiles: Number of test files to separate
-            shuffleFiles: Shuffle files before splitting test files
-    """    
     classDirectories = getDirectories(inputTrainDirectory)
     for classDirectory in classDirectories:
         inputTrainClassDirectory = os.path.join(inputTrainDirectory, classDirectory)  
@@ -111,9 +78,6 @@ def createTrainAndTestData(inputTrainDirectory, datasetTrainDirectory, datasetTe
 
 
 def recreateValidationDataDefault():
-    """recreateValidationDataDefault
-
-    """     
     # Get default values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
@@ -126,22 +90,11 @@ def recreateValidationDataDefault():
 
 
 def recreateValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize):
-    """recreateValidationData
-        Arguments:
-            datasetTrainDirectory: Dataset train directory
-            datasetValidateDirectory: Dataset validate directory
-            percentageOfValidationFiles: Percentage of training files used for validation
-            shuffleFiles: Shuffle files for cross validation
-            batchSize: Round number of files in each folder according to the later batch size
-    """  
     deleteValidationData(datasetValidateDirectory)
     createValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize)
     
 
 def deleteValidationDataDefault():
-    """deleteValidationDataDefault
-
-    """   
     # Get default values
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
     
@@ -150,17 +103,10 @@ def deleteValidationDataDefault():
 
 
 def deleteValidationData(datasetValidateDirectory):
-    """deleteCrossValidationDataDefault
-        Arguments:
-            datasetValidateDirectory: Dataset Validate Directory 
-    """      
     deleteSubdirectories(datasetValidateDirectory)
 
 
 def createValidationDataDefault():
-    """createValidationDataDefault
-
-    """    
     # Get deault values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
@@ -173,14 +119,6 @@ def createValidationDataDefault():
 
 
 def createValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize):
-    """createValidationData
-        Arguments:
-            datasetTrainDirectory: Dataset train directory
-            datasetValidateDirectory: Dataset validate directory    
-            percentageOfValidationFiles: Percentage of training files used for validation       
-            shuffleFiles: Shuffle files for cross validation
-            batchSize: Round number of files in each folder according to the later batch size
-    """ 
     classDirectories = getDirectories(datasetTrainDirectory)
     for classDirectory in classDirectories:
         datasetTrainClassDirectory = os.path.join(datasetTrainDirectory, classDirectory)
@@ -196,17 +134,11 @@ def createValidationData(datasetTrainDirectory, datasetValidateDirectory, percen
 
 
 def recreatePredictDataDefault():
-    """recreatePredictDataDefault
-
-    """   
     deletePredictDataDefault()
     createPredictDataDefault()
 
 
 def deletePredictDataDefault():
-    """deletePredictDataDefault
-
-    """   
     # Get default values
     datasetPredictDirectory = readConfigFile("DIRECTORY", "datasetPredict")
     
@@ -215,17 +147,10 @@ def deletePredictDataDefault():
 
 
 def deletePredictData(datasetPredictDirectory):
-    """deletePredictData
-        Arguments:
-            datasetPredictDirectory: Dataset Predict Directory 
-    """      
     deleteSubdirectories(datasetPredictDirectory)    
 
 
 def createPredictDataDefault():
-    """createPredictDataDefault
-
-    """  
     # Get default values
     inputPredictDirectory = readConfigFile("DIRECTORY", "inputPredict")
     datasetPredictDirectory = readConfigFile("DIRECTORY", "datasetPredict")
@@ -237,14 +162,6 @@ def createPredictDataDefault():
 
 
 def createPredictData(inputPredictDirectory, datasetPredictDirectory, datasetPredictSubsetDirectory, maxFiles):
-    """createPredictData
-        Arguments:
-            inputPredictDirectory: Input predict directory
-            datasetPredictDirectory: Dataset predict directory
-            datasetPredictSubsetDirectory: Dataset predict subset directory
-            maxFiles: Maximum amount of files to predict            
-
-    """      
     datasetPredictSubsetTemplateDirectory = datasetPredictSubsetDirectory
     classDirectories = getDirectories(inputPredictDirectory)
     for classDirectory in classDirectories:

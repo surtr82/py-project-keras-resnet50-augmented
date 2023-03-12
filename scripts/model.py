@@ -1,4 +1,4 @@
-# Load required packages
+# Load required modules
 from numpy import array, mean
 import matplotlib.pyplot as plt
 import os
@@ -11,20 +11,14 @@ from tensorflow.keras.models import load_model, Model
 from tensorflow.keras.optimizers import Adam	
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
-from tensorflow.keras.utils import plot_model
 
-
-# Load required py-scripts
+# Load required scripts
 from scripts.config import readConfigFile, getWidth, getHeight, getDepth, getBatchSize
 from scripts.file import getFiles, getFilesIncludingSubdirectories, getDirectories, createDirectory, deleteSubdirectories
 from scripts.hist import histPrediction, histPredictionTest
 
 
 def getModelBaseDefault():
-    """getModelBaseDefault
-        Return:
-            Resnet50 model base           
-    """
     width = getWidth()
     height = getHeight()
     depth = getDepth()
@@ -32,14 +26,6 @@ def getModelBaseDefault():
 
 
 def getModelBase(width, height, depth):
-    """getModelBase
-        Arguments:
-            width: Image width
-            height: Image height
-            depth: Color depth
-        Return:
-            Resnet50 model base
-    """
     modelBase = ResNet50(
         weights="imagenet",
         include_top=False,
@@ -49,9 +35,6 @@ def getModelBase(width, height, depth):
 
 
 def trainModelDefault():
-    """trainModelDefault
-
-    """
     # Get default values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
@@ -67,18 +50,7 @@ def trainModelDefault():
 
 
 def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize):
-    """trainModel
-        Arguments:
-            datasetTrainDirectory: Dataset train directory
-            datasetValidateDirectory: Datasete validate directory
-            outputTrainDirectory: Output train directory
-            outputValidateDirectory: Output validate directory
-            width: Image width
-            height: Image height
-            depth: Color depth
-            batchSize: Batch size
-    """ 
-    # define the ImageNet mean subtraction (in RGB order) and set the
+    # Define the ImageNet mean subtraction (in RGB order) and set the
     # the mean subtraction value for each of the data augmentation objects
     mean = array([123.68, 116.779, 103.939], dtype="float32")
 
@@ -157,19 +129,6 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
 
 
 def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, validateData = None, validateStepsPerEpoch = None):
-    """buildModel
-        Arguments: 
-            width: Image width
-            height: Image height
-            depth: Image depth
-            batchSize: Batch size
-            trainData: Training data
-            trainStepsPerEpoch: Train steps per epoch
-            validationData: Optional validation data
-            validateStepsPerEpoch: Optional validation steps per epoch
-        Return:
-            Built model
-    """
     # Get resnet50 model base
     modelBase = getModelBase(width, height, depth)
 
@@ -195,7 +154,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(lr=0.00001),
+        optimizer = Adam(learning_rate=1e-4),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
@@ -204,7 +163,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=5)
     checkpointCallback = ModelCheckpoint('output/train/model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 
-    history = model.fit_generator(
+    history = model.fit(
         trainData,
         steps_per_epoch = trainStepsPerEpoch,
         epochs = epochs,
@@ -217,10 +176,6 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
 
 def loadModelDefault():
-    """loadModelDefault
-        Return:
-            Keras model object
-    """
     # Get default values
     outputTrainDirectory = readConfigFile("DIRECTORY", "outputTrain")
 
@@ -229,13 +184,6 @@ def loadModelDefault():
 
 
 def loadModel(outputTrainDirectory, fileName="model.h5"):
-    """loadModel
-        Arguments:
-            dsEntry: datasetEntry object
-            fileNanme: default file name
-        Return:
-            Keras model object
-    """
     filePath = os.path.join(outputTrainDirectory, fileName)
     if os.path.exists(filePath):
         model = load_model(filePath)
@@ -245,12 +193,6 @@ def loadModel(outputTrainDirectory, fileName="model.h5"):
 
 
 def predictFilesDefault(model):
-    """predictFiles
-        Arguments:
-            model: Trained model to use
-        Return:
-            DataFrame of all predictions
-    """    
     # Get default values
     datasetPredictDirectory = readConfigFile("DIRECTORY", "datasetPredict")
     outputPredictDirectory = readConfigFile("DIRECTORY", "outputPredict")
@@ -285,12 +227,6 @@ def predictFilesDefault(model):
         
 
 def predictTestFilesDefault(model):
-    """predictTestFilesDefault
-        Arguments:
-            model: Trained model to use
-        Return:
-            DataFrame of all predictions
-    """    
     # Get default values
     datasetTestDirectory = readConfigFile("DIRECTORY", "datasetTest")
     outputTestDirectory = readConfigFile("DIRECTORY", "outputTest")
@@ -305,16 +241,7 @@ def predictTestFilesDefault(model):
 
 
 def predictFiles(model, datasetPredictDirectory, width, height, depth):
-    """predictFiles
-        Arguments:
-            model: Trained model to use
-            datasetPredictDirectory: Path to directory, containing the image files to predict
-            width: Image width
-            height: Image height
-            depth: Color depth
-        Return:
-            DataFrame of all predictions
-    """
+    # ImageNet mean subtraction
     mean = array([123.68, 116.779, 103.939], dtype="float32")
 
     # initialize the testing generator
@@ -329,10 +256,10 @@ def predictFiles(model, datasetPredictDirectory, width, height, depth):
         shuffle=False,
         target_size=(width, height)
     )
-    
+        
     # Print data    
     predictData.reset()
-    predictions = model.predict_generator(predictData, steps=(predictData.n // 10))   
+    predictions = model.predict(predictData, steps=(predictData.n // 10))   
 
     # Prepare results
     names = list()

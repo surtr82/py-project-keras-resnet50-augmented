@@ -1,31 +1,20 @@
-
-# Load required packages
-import sys
-
-sys.path.append('/env/lib/python3.6/site-packages')
+# Load required modules
 from cv2 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
+import os
+import pandas
 from keras import backend as K
 from keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input
 import tensorflow as tf
-from matplotlib import pyplot as plt
-import os
-import pandas
-
 
 # Load required scripts
-from scripts.config import initConfigFile, readConfigFile, getWidth, getHeight
-from scripts.model import loadModelDefault
+from .config import readConfigFile, getWidth, getHeight
+from .model import loadModelDefault
 
 
 def visualizePredictionsDefault(minPercentage = 50, layerName = "conv5_block3_out", classIndex=0):
-    """visualizePredictionsDefault
-        Arguments:
-            minPercentage: Minimum prediction percentage to filter
-            layerName: Layer to visualize
-            classIndex: Index of class to visualize
-    """     
     # Get default values 
     model = loadModelDefault()
     outputPredictDirectory = readConfigFile("DIRECTORY", "outputPredict")
@@ -39,12 +28,6 @@ def visualizePredictionsDefault(minPercentage = 50, layerName = "conv5_block3_ou
 
 
 def visualizeTestPredictionsDefault(minPercentage = 50, layerName = "conv5_block3_out", classIndex=0):
-    """visualizeTestPredictionsDefault
-        Arguments:
-            minPercentage: Minimum prediction percentage to filter
-            layerName: Layer to visualize
-            classIndex: Index of class to visualize
-    """     
     # Get default values 
     model = loadModelDefault()
     outputPredictDirectory = readConfigFile("DIRECTORY", "outputTest")
@@ -58,16 +41,6 @@ def visualizeTestPredictionsDefault(minPercentage = 50, layerName = "conv5_block
 
 
 def visualizePredictions(model, filePath, width, height, minPercentage, outputPredictDirectory, layerName = "res5c_branch2c", classIndex=0):
-    """visualizePredictions
-        Arguments:
-            model: ConvNet model
-            filePath: Image to visualize
-            width: Image width
-            height: Image height
-            minPercentage: Minimum prediction percentage to filter
-            layerName: Layer to visualize
-            classIndex: Class to visualize
-    """ 
     predictions = pandas.read_csv(filePath, sep=";" )    
     predictions = predictions[predictions.percentage >= minPercentage]
     for index, row in predictions.iterrows():
@@ -75,16 +48,6 @@ def visualizePredictions(model, filePath, width, height, minPercentage, outputPr
 
 
 def visualizeGradCam(model, layerName, filePath, width, height, outputPredictDirectory, classIndex=0):
-    """visualizeGradCam
-        Arguments:
-            model: ConvNet model
-            layerName: Layer to visualize            
-            filePath: Image to visualize 
-            width: Image width
-            height: Image height
-            outputPredictDirectory: Output directory
-            classIndex: Class to visualize
-    """     
     img = loadImage(filePath, height, width)
     gradcam = computeGradCam(model, img, width, height, classIndex, layerName)
     jetcam = computeJetCam(gradcam, filePath, width, height)
@@ -92,15 +55,6 @@ def visualizeGradCam(model, layerName, filePath, width, height, outputPredictDir
     
 
 def loadImage(filePath, width, height, preprocess=True):
-    """Load and preprocess image
-        Arguments:
-            filePath: File to load
-            width: Image width
-            height: Image height
-            preprocess: Prprocess image 
-        Return:
-            Image tensor
-    """
     img = image.load_img(filePath, target_size=(width, height))
     if preprocess:
         img = image.img_to_array(img)
@@ -110,17 +64,6 @@ def loadImage(filePath, width, height, preprocess=True):
 
 
 def computeGradCam(model, image, width, height, classIndex, layerName):
-    """GradCAM method for visualizing input saliency
-        Arguments:
-            model: ConvNet model
-            image: Image
-            width: Image width
-            height: Image height
-            classIndex: Class to highlight
-            layerName: ConvNet Layer
-        Return:
-            Grad-CAM tensor
-    """    
     y_c = model.output[0, classIndex]
     conv_output = model.get_layer(layerName).output
     grads = K.gradients(y_c, conv_output)[0]
@@ -144,23 +87,11 @@ def computeGradCam(model, image, width, height, classIndex, layerName):
     
 
 def normalize(grads):
-    """normalize
-        Arguments:
-            grads: Tensor
-        Return:
-            Normalized tensor by its L2 norm
-    """
+    # Normalize tensor by its L2 norm
     return (grads + 1e-10) / (K.sqrt(K.mean(K.square(grads))) + 1e-10)
 
 
 def computeJetCam(gradcam, filePath, width, height):
-    """getJetCam
-        Arguments:
-            gradcam: Grad-CAM
-            filePath: File to apply grad-CAM
-        Return:
-            jetcam
-    """
     jetcam = cv2.applyColorMap(np.uint8(255 * gradcam), cv2.COLORMAP_JET)
     jetcam = (np.float32(jetcam) + loadImage(filePath, width, height, preprocess=False)) / 2
     jetcam = np.uint8(jetcam)
@@ -168,9 +99,6 @@ def computeJetCam(gradcam, filePath, width, height):
 
 
 def main():
-    """main
-
-    """    
     visualizePredictionsDefault()
 
 

@@ -1,14 +1,13 @@
+# Load required modules
+import tensorflow as tf
+
 # Load py-scripts
-from visualizePrediction import visualizeTestPredictionsDefault
 from scripts.config import initConfigFile
 from scripts.model import loadModelDefault, predictTestFilesDefault
-import tensorflow as tf
+from scripts.visualizePrediction import visualizeTestPredictionsDefault
 
 
 def main():
-    """main
-
-    """
     # Init config file
     initConfigFile()
 
@@ -17,10 +16,12 @@ def main():
 
     # Predict test files
     predictTestFilesDefault(model)
+
+    # Visualize positive predictions
     visualizeTestPredictionsDefault()
 
 
 # Execute main routine
 if __name__ == '__main__':
-    tf.compat.v1.disable_eager_execution()
+    tf.compat.v1.disable_eager_execuion()
     main()

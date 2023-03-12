@@ -4,9 +4,6 @@ from scripts.dataset import recreateDatasetDefault
 
 
 def main():
-    """main
-    
-    """
     # Init config file
     initConfigFile()
 

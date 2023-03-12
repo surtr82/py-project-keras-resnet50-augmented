@@ -1,14 +1,8 @@
-# Load required py-packages
+# Load required modules
 import matplotlib.pyplot as plt
-import os
-import pandas
 
 
 def histPrediction(predictions, filePath = None):
-    """histPrediction
-        Arguments:
-            predictions: DataFrame with predictions to visualize
-    """    
     plt.clf()
     plt.hist(list(predictions.percentage), label=["Tell"])
     plt.legend(loc='upper center', frameon=False)    
@@ -19,11 +13,6 @@ def histPrediction(predictions, filePath = None):
        
 
 def histPredictionTest(predictions, filePath = None):
-    """histPredictionTest
-        Arguments:
-            predictions: DataFrame with predictions to visualize
-            filePath: Optional file path to save image to
-    """
     other = predictions[predictions['name'].str.contains('Other|Map', case=True, regex=True)]
     tell = predictions[~predictions['name'].str.contains('Other|Map', case=True, regex=True, na = False)]
 
