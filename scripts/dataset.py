@@ -4,7 +4,6 @@ import os
 import random
 import shutil
 
-
 # Load required scripts
 from scripts.config import readConfigFile, getNoOfTestFiles, getPercentageOfValidationFiles, useShuffledFiles, getBatchSize, getMaxFiles
 from scripts.file import getFiles, copyFiles, moveFiles, getDirectories, createDirectory, deleteSubdirectories

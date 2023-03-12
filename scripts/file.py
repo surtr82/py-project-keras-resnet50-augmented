@@ -1,4 +1,4 @@
-# Load required packages
+# Load required modules
 import os
 import shutil
 

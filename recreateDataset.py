@@ -1,4 +1,4 @@
-# Load py-scripts
+# Load required scripts
 from scripts.config import initConfigFile
 from scripts.dataset import recreateDatasetDefault
 

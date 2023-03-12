@@ -1,7 +1,7 @@
 # Load required modules
 import tensorflow as tf
 
-# Load py-scripts
+# Load required scripts
 from scripts.config import initConfigFile
 from scripts.model import loadModelDefault, predictTestFilesDefault
 from scripts.visualizePrediction import visualizeTestPredictionsDefault
@@ -23,5 +23,5 @@ def main():
 
 # Execute main routine
 if __name__ == '__main__':
-    tf.compat.v1.disable_eager_execuion()
+    tf.compat.v1.disable_eager_execution()
     main()

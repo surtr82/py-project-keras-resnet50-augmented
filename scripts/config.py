@@ -1,4 +1,4 @@
-# Install required packages
+# Load required modules
 import configparser
 import os
 

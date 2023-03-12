@@ -1,7 +1,7 @@
 # Load required modules
 import tensorflow as tf
 
-# Load py-scripts
+# Load required scripts
 from scripts.config import initConfigFile
 from scripts.model import trainModelDefault, predictTestFilesDefault
 from scripts.visualizePrediction import visualizeTestPredictionsDefault
