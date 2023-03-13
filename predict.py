@@ -11,11 +11,11 @@ def main():
     # Init config file
     initConfigFile()
     
-    # # Get base and load trained model
-    # model = loadModelDefault()
+    # Get base and load trained model
+    model = loadModelDefault()
 
-    # # Predict test files
-    # predictFilesDefault(model)
+    # Predict test files
+    predictFilesDefault(model)
 
     # Visualize positive predictions
     visualizePredictionsDefault()

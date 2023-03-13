@@ -18,10 +18,10 @@ def main():
     predictTestFilesDefault(model)
 
     # Visualize positive predictions
+    tf.compat.v1.disable_eager_execution()
     visualizeTestPredictionsDefault()
 
 
 # Execute main routine
 if __name__ == '__main__':
-    tf.compat.v1.disable_eager_execution()
     main()

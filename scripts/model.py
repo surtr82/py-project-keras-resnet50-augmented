@@ -8,7 +8,7 @@ from tensorflow.keras.applications.resnet50 import preprocess_input
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow.keras.layers import MaxPooling2D, Dense, Dropout, Flatten
 from tensorflow.keras.models import load_model, Model
-from tensorflow.keras.optimizers.legacy import Adam	
+from tensorflow.keras.optimizers import Adam	
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
 
@@ -93,12 +93,20 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
     )
 
     # Define steps per epoch
-    epochs = 20
+    epochs = 30
     trainStepsPerEpoch = int(trainData.n / batchSize)
     validateStepsPerEpcoh = int(validateData.n / batchSize)     
 
     # Build model
     model, history = buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, validateData, validateStepsPerEpcoh)
+
+    # Save history
+    try:
+        history_df = pandas.DataFrame(history.history) 
+        with open(os.path.join(outputValidateDirectory, 'model_accuracy.csv'), mode='w') as f:
+            history_df.to_csv(f)
+    except:
+        print("model_accuracy.csv save failed.")
 
     # Plot training & validation accuracy values
     plt.plot(history.history['accuracy'])
