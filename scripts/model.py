@@ -103,8 +103,7 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
     # Save history
     try:
         history_df = pandas.DataFrame(history.history) 
-        with open(os.path.join(outputValidateDirectory, 'model_accuracy.csv'), mode='w') as f:
-            history_df.to_csv(f)
+        history_df.to_csv(os.path.join(outputValidateDirectory, 'model_accuracy.csv'))
     except:
         print("model_accuracy.csv save failed.")
 
