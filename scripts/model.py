@@ -247,6 +247,13 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
     # Build model
     model, history = buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch)
 
+    # Save history
+    try:
+        history_acc = pandas.DataFrame(history.history) 
+        history_acc.to_csv(os.path.join(outputValidateDirectory, 'model_accuracy.csv'))
+    except:
+        print("model_accuracy.csv save failed.")
+
     # Save model
     filePath = os.path.join(outputTrainDirectory, "model.h5")
     model.save(filePath)
