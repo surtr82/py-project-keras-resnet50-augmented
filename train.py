@@ -3,7 +3,7 @@ import tensorflow as tf
 
 # Load required scripts
 from scripts.config import initConfigFile
-from scripts.model import trainModelDefault, predictTestFilesDefault
+from scripts.model import executeCrossValidationDefault, trainFinalModelDefault, predictTestFilesDefault
 from scripts.visualizePrediction import visualizeTestPredictionsDefault
 
 
@@ -11,8 +11,9 @@ def main():
     # Init config file
     initConfigFile()
 
-    # Train model
-    model = trainModelDefault()
+    # Execute cross validation and train model
+    executeCrossValidationDefault()
+    model = trainFinalModelDefault()
 
     # Predict test files
     predictTestFilesDefault(model)

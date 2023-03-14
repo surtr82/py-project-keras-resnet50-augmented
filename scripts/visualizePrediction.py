@@ -1,11 +1,9 @@
 # Load required modules
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 import pandas
 from keras import backend as K
-from keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input
 import tensorflow as tf
 

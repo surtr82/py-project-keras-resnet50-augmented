@@ -110,7 +110,7 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
         )
 
         # Define steps per epoch
-        epochs = 2
+        epochs = 30
         trainStepsPerEpoch = int(trainData.n / batchSize)   
         validateStepsPerEpcoh = int(validateData.n / batchSize)     
 
@@ -241,7 +241,7 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
     )
 
     # Define steps per epoch
-    epochs = 7
+    epochs = 30
     trainStepsPerEpoch = int(trainData.n / batchSize)
                 
     # Build model
@@ -287,13 +287,13 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(lr=0.00001),
+        optimizer = Adam(learning_rate=0.00001),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
 
     # Train the model
-    history = model.fit_generator(
+    history = model.fit(
         trainData,
         steps_per_epoch = trainStepsPerEpoch,
         epochs = epochs,
@@ -387,7 +387,7 @@ def predictFiles(model, datasetPredictDirectory, width, height, depth):
     
     # Print data    
     predictData.reset()
-    predictions = model.predict_generator(predictData, steps=(predictData.n // 10))   
+    predictions = model.predict(predictData, steps=(predictData.n // 10))   
 
     # Prepare results
     names = list()
