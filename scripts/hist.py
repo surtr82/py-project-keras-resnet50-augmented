@@ -24,3 +24,4 @@ def histPredictionTest(predictions, filePath = None):
         plt.show()
     else:
         plt.savefig(filePath)
+

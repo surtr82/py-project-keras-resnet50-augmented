@@ -67,8 +67,6 @@ def computeGradCam(model, image, width, height, classIndex, layerName):
     y_c = model.output[0, classIndex]
     conv_output = model.get_layer(layerName).output
     grads = K.gradients(y_c, conv_output)[0]
-    # grads = tf.GradientType(y_c, conv_output)[0]
-    # grads = normalize(grads)
     gradient_function = K.function([model.input], [conv_output, grads])
 
     output, grads_val = gradient_function([image])
@@ -96,14 +94,4 @@ def computeJetCam(gradcam, filePath, width, height):
     jetcam = (np.float32(jetcam) + loadImage(filePath, width, height, preprocess=False)) / 2
     jetcam = np.uint8(jetcam)
     return jetcam
-
-
-def main():
-    visualizePredictionsDefault()
-
-
-# Execute main routine
-if __name__ == '__main__':
-    tf.compat.v1.disable_eager_execution()
-    main()
 

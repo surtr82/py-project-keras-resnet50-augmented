@@ -33,11 +33,6 @@ def copyFiles(sourceFilePaths, destinationDirectory):
         shutil.copy(sourceFilePath, destinationDirectory)    
 
 
-def moveFiles(sourceFilePaths, destinationDirectory):
-    for sourceFilePath in sourceFilePaths:
-        shutil.move(sourceFilePath, destinationDirectory)    
-
-
 def getDirectories(rootDirectory, fullPath=False):
     directories = []
     for contentName in os.listdir(rootDirectory):

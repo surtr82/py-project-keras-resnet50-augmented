@@ -11,9 +11,10 @@ from tensorflow.keras.models import load_model, Model
 from tensorflow.keras.optimizers import Adam	
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.preprocessing import image
+from tensorflow.keras.utils import plot_model
 
 # Load required scripts
-from scripts.config import readConfigFile, getWidth, getHeight, getDepth, getBatchSize
+from scripts.config import readConfigFile, getWidth, getHeight, getDepth, getBatchSize, getNoOfFolds
 from scripts.file import getDirectories, createDirectory, deleteSubdirectories
 from scripts.hist import histPrediction, histPredictionTest
 
@@ -34,7 +35,164 @@ def getModelBase(width, height, depth):
     return modelBase
 
 
-def trainModelDefault():
+def executeCrossValidationDefault():
+    # Get default values
+    datasetValidateFoldTrainDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldTrain")
+    datasetValidateFoldValidateDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldValidate")
+    outputValidateDirectory = readConfigFile("DIRECTORY", "outputValidate")
+    noOfFolds = getNoOfFolds()
+    width = getWidth()
+    height = getHeight()
+    depth = getDepth()
+    batchSize = getBatchSize()
+
+    # Run routine
+    executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, outputValidateDirectory, noOfFolds, width, height, depth, batchSize)
+
+
+def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, outputValidateDirectory, noOfFolds, width, height, depth, batchSize):
+    # Terminal output
+    print("")
+    print("=== Cross Validation ===")
+
+    # Init plot results  
+    historiesAccuracy = []
+    historiesValidationAccuracy = []
+    historiesLoss = []
+    historiesValidationLoss = []
+
+    # define the ImageNet mean subtraction (in RGB order) and set the
+    # the mean subtraction value for each of the data augmentation objects
+    mean = array([123.68, 116.779, 103.939], dtype="float32")
+
+    for i in range(noOfFolds):
+        print("Fold No. %s" % str(i))
+
+        # Process train files
+        trainDataGenerator = ImageDataGenerator(
+            preprocessing_function = preprocess_input,
+            rotation_range=5,
+            zoom_range=[0.95, 1],
+            horizontal_flip=True, 
+            # vertical_flip=True,
+            width_shift_range=0.05,
+            height_shift_range=0.1,
+            brightness_range=[0.7, 1.0],
+            fill_mode="constant",
+            cval=75
+        )
+
+        trainDataGenerator.mean = mean
+        trainDirectory = datasetValidateFoldTrainDirectory.replace("$", str(i))
+        trainData = trainDataGenerator.flow_from_directory(
+            trainDirectory,
+            batch_size = batchSize,
+            color_mode = "rgb",
+            class_mode = "binary",
+            shuffle = True,        
+            target_size = (width, height)
+        )
+
+        # Process validate files
+        validateDataGenerator = ImageDataGenerator(
+            preprocessing_function = preprocess_input
+        )
+
+        validateDataGenerator.mean = mean
+        validateDirectory = datasetValidateFoldValidateDirectory.replace("$", str(i))
+        validateData = validateDataGenerator.flow_from_directory(
+            validateDirectory,
+            batch_size = batchSize,
+            class_mode = "binary",
+            color_mode = "rgb",
+            shuffle = True,
+            target_size = (width, height)
+        )
+
+        # Define steps per epoch
+        epochs = 2
+        trainStepsPerEpoch = int(trainData.n / batchSize)   
+        validateStepsPerEpcoh = int(validateData.n / batchSize)     
+
+        # Build model
+        model, history = buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, validateData, validateStepsPerEpcoh)
+
+
+        # Plot dictory
+        outputValidateFoldDirectory = os.path.join(outputValidateDirectory, "fold$".replace("$", str(i)))
+        createDirectory(outputValidateFoldDirectory)
+
+        # Plot training & validation accuracy values
+        plt.plot(history.history['accuracy'])
+        plt.plot(history.history['val_accuracy'])
+        plt.title('Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Validate'], loc='upper left')
+        plt.savefig(os.path.join(outputValidateFoldDirectory, 'model_accuracy.pdf'))
+        plt.close()
+
+        # Plot training & validation loss values
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.title('Model loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Validate'], loc='upper left')
+        plt.savefig(os.path.join(outputValidateFoldDirectory, 'model_loss.pdf'))
+        plt.close()
+
+        # Save model
+        filePath = os.path.join(outputValidateFoldDirectory, "model.h5")
+        model.save(filePath)
+
+        # Save measurments for mean calculation
+        historyAccuracy = history.history['accuracy']
+        historiesAccuracy.append(historyAccuracy)
+        historyValidationAccuracy = history.history['val_accuracy']        
+        historiesValidationAccuracy.append(historyValidationAccuracy)
+        historyLoss = history.history['loss']
+        historiesLoss.append(historyLoss)
+        historyValidationLoss = history.history['val_loss']
+        historiesValidationLoss.append(historyValidationLoss)
+
+    # Plot measurement means
+    columns = [str(i) for i in range(1, len(historyAccuracy)+1)]
+    historiesAccuracyDataFrame = pandas.DataFrame(historiesAccuracy, columns=columns)
+    historiesValidationAccuracyDataFrame = pandas.DataFrame(historiesValidationAccuracy, columns=columns)
+    historiesLossDataFrame = pandas.DataFrame(historiesLoss, columns=columns)
+    historiesValidationLossDataFrame = pandas.DataFrame(historiesValidationLoss, columns=columns)
+
+    try:
+        historiesAccuracyDataFrame.to_csv(os.path.join(outputValidateDirectory, 'train_accuracy.csv'))
+        historiesValidationAccuracyDataFrame.to_csv(os.path.join(outputValidateDirectory, 'validation_accuracy.csv'))
+        historiesLossDataFrame.to_csv(os.path.join(outputValidateDirectory, 'train_loss.csv'))    
+        historiesValidationLossDataFrame.to_csv(os.path.join(outputValidateDirectory, 'validation_loss.csv')) 
+    except:
+        print("Save of accuracy and loss files failed.")
+
+    # Plot training & validation accuracy mean values
+    plt.plot(historiesAccuracyDataFrame.mean())
+    plt.plot(historiesValidationAccuracyDataFrame.mean())
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validate'], loc='upper left')
+    plt.savefig(os.path.join(outputValidateDirectory, 'model_accuracy.pdf'))
+    plt.close()
+
+    # Plot training & validation loss mean values
+    plt.plot(historiesLossDataFrame.mean())
+    plt.plot(historiesValidationLossDataFrame.mean())
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validate'], loc='upper left')
+    plt.savefig(os.path.join(outputValidateDirectory, 'model_loss.pdf'))
+    plt.close()
+
+
+def trainFinalModelDefault():
     # Get default values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
@@ -46,11 +204,16 @@ def trainModelDefault():
     batchSize = getBatchSize()
 
     # Run routine
-    return trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize)
+    return trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize)
 
 
-def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize):
-    # ImageNet mean subtraction
+def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirectory, outputValidateDirectory, width, height, depth, batchSize):
+    # Terminal output
+    print("")
+    print("=== Train final model ===")
+
+    # define the ImageNet mean subtraction (in RGB order) and set the
+    # the mean subtraction value for each of the data augmentation objects
     mean = array([123.68, 116.779, 103.939], dtype="float32")
 
     # Process train files
@@ -77,56 +240,16 @@ def trainModel(datasetTrainDirectory, datasetValidateDirectory, outputTrainDirec
         target_size = (width, height)
     )
 
-    # Process validate files
-    validateDataGenerator = ImageDataGenerator(
-        preprocessing_function = preprocess_input
-    )
-
-    validateDataGenerator.mean = mean
-    validateData = validateDataGenerator.flow_from_directory(
-        datasetValidateDirectory,
-        batch_size = batchSize,
-        class_mode = "binary",
-        color_mode = "rgb",
-        shuffle = True,
-        target_size = (width, height)
-    )
-
     # Define steps per epoch
-    epochs = 30
+    epochs = 7
     trainStepsPerEpoch = int(trainData.n / batchSize)
-    validateStepsPerEpcoh = int(validateData.n / batchSize)     
-
+                
     # Build model
-    model, history = buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, validateData, validateStepsPerEpcoh)
+    model, history = buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch)
 
-    # Save history
-    try:
-        history_df = pandas.DataFrame(history.history) 
-        with open(os.path.join(outputValidateDirectory, 'model_accuracy.csv'), mode='w') as f:
-            history_df.to_csv(f)
-    except:
-        print("model_accuracy.csv save failed.")
-
-    # Plot training & validation accuracy values
-    plt.plot(history.history['accuracy'])
-    plt.plot(history.history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('Accuracy')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Validate'], loc='upper left')
-    plt.savefig(os.path.join(outputValidateDirectory, 'model_accuracy.pdf'))
-    plt.close()
-
-    # Plot training & validation loss values
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('Loss')
-    plt.xlabel('Epoch')
-    plt.legend(['Train', 'Validate'], loc='upper left')
-    plt.savefig(os.path.join(outputValidateDirectory, 'model_loss.pdf'))
-    plt.close()
+    # Save model
+    filePath = os.path.join(outputTrainDirectory, "model.h5")
+    model.save(filePath)
 
     return model
 
@@ -157,22 +280,18 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(learning_rate=1e-5),
+        optimizer = Adam(lr=0.00001),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
 
-    # Train the model with early stopping
-    earlyStoppingCallback = EarlyStopping(monitor='val_loss', patience=10)
-    checkpointCallback = ModelCheckpoint('output/train/model.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-
-    history = model.fit(
+    # Train the model
+    history = model.fit_generator(
         trainData,
         steps_per_epoch = trainStepsPerEpoch,
         epochs = epochs,
         validation_data = validateData,
-        validation_steps = validateStepsPerEpoch,
-        callbacks=[earlyStoppingCallback, checkpointCallback]
+        validation_steps = validateStepsPerEpoch
     )
 
     return model, history
@@ -244,7 +363,6 @@ def predictTestFilesDefault(model):
 
 
 def predictFiles(model, datasetPredictDirectory, width, height, depth):
-    # ImageNet mean subtraction
     mean = array([123.68, 116.779, 103.939], dtype="float32")
 
     # initialize the testing generator
@@ -259,10 +377,10 @@ def predictFiles(model, datasetPredictDirectory, width, height, depth):
         shuffle=False,
         target_size=(width, height)
     )
-        
+    
     # Print data    
     predictData.reset()
-    predictions = model.predict(predictData, steps=(predictData.n // 10))   
+    predictions = model.predict_generator(predictData, steps=(predictData.n // 10))   
 
     # Prepare results
     names = list()
@@ -296,7 +414,7 @@ def predictFiles(model, datasetPredictDirectory, width, height, depth):
             lon = float(lon)        
 
             # Get percentage
-            prct = (predictions[index,0] * 100)
+            prct = (100 - (predictions[index,0] * 100))
         except:
             name = 'Unknown'
             lat = 0.00

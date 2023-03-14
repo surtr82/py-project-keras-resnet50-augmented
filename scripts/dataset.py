@@ -4,13 +4,13 @@ import os
 import random
 
 # Load required scripts
-from scripts.config import readConfigFile, getNoOfTestFiles, getPercentageOfValidationFiles, useShuffledFiles, getBatchSize, getMaxFiles
-from scripts.file import getFiles, copyFiles, moveFiles, getDirectories, createDirectory, deleteSubdirectories
+from scripts.config import readConfigFile, getNoOfFolds, getNoOfTestFiles, getNoOfFolds, useShuffledFiles, getBatchSize, getMaxFiles
+from scripts.file import getFiles, copyFiles, getDirectories, createDirectory, deleteSubdirectories
 
 
 def recreateDatasetDefault():
     recreateTrainAndTestDataDefault()
-    recreateValidationDataDefault()
+    recreateCrossValidationDataDefault()
     recreatePredictDataDefault()
 
 
@@ -75,48 +75,53 @@ def createTrainAndTestData(inputTrainDirectory, datasetTrainDirectory, datasetTe
         copyFiles(inputTrainClassFilePaths[ :noOfTestFiles], datasetTestClassDirectory)
 
 
-def recreateValidationDataDefault():
+def recreateCrossValidationDataDefault():
     # Get default values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
-    percentageOfValidationFiles = getPercentageOfValidationFiles()
+    datasetValidateFoldTrainDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldTrain")
+    datasetValidateFoldValidateDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldValidate")
+    noOfFolds = getNoOfFolds()
     shuffleFiles = useShuffledFiles()
     batchSize = getBatchSize()    
     
     # Run routine
-    recreateValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize)
+    recreateCrossValidationData(datasetTrainDirectory, datasetValidateDirectory, datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, noOfFolds, shuffleFiles, batchSize)
 
 
-def recreateValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize):
-    deleteValidationData(datasetValidateDirectory)
-    createValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize)
+def recreateCrossValidationData(datasetTrainDirectory, datasetValidateDirectory, datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, noOfFolds, shuffleFiles, batchSize):
+    deleteCrossValidationData(datasetValidateDirectory)
+    createCrossValidationData(datasetTrainDirectory, datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, noOfFolds, shuffleFiles, batchSize)
     
 
-def deleteValidationDataDefault():
+def deleteCrossValidationDataDefault():
     # Get default values
     datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
     
     # Run routine
-    deleteValidationData(datasetValidateDirectory)
+    deleteCrossValidationData(datasetValidateDirectory)
 
 
-def deleteValidationData(datasetValidateDirectory):
+def deleteCrossValidationData(datasetValidateDirectory):
     deleteSubdirectories(datasetValidateDirectory)
 
 
-def createValidationDataDefault():
+def createCrossValidationDataDefault():
     # Get deault values
     datasetTrainDirectory = readConfigFile("DIRECTORY", "datasetTrain")
-    datasetValidateDirectory = readConfigFile("DIRECTORY", "datasetValidate")
-    percentageOfValidationFiles = getPercentageOfValidationFiles()
+    datasetValidateFoldTrainDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldTrain")
+    datasetValidateFoldValidateDirectory = readConfigFile("DIRECTORY", "datasetValidateFoldValidate")
+    noOfFolds = getNoOfFolds()
     shuffleFiles = useShuffledFiles()
     batchSize = getBatchSize()    
     
     # Run routine
-    createValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize)
+    createCrossValidationData(datasetTrainDirectory, datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, noOfFolds, shuffleFiles, batchSize)
 
 
-def createValidationData(datasetTrainDirectory, datasetValidateDirectory, percentageOfValidationFiles, shuffleFiles, batchSize):
+def createCrossValidationData(datasetTrainDirectory, datasetValidateFoldTrainDirectory, datasetValidateFoldValidateDirectory, noOfFolds, shuffleFiles, batchSize):
+    datasetValidateFoldTrainDirectoryTemplate = datasetValidateFoldTrainDirectory
+    datasetValidateFoldValidateDirectoryTemplate = datasetValidateFoldValidateDirectory
     classDirectories = getDirectories(datasetTrainDirectory)
     for classDirectory in classDirectories:
         datasetTrainClassDirectory = os.path.join(datasetTrainDirectory, classDirectory)
@@ -124,11 +129,29 @@ def createValidationData(datasetTrainDirectory, datasetValidateDirectory, percen
         if shuffleFiles: 
             random.shuffle(datasetTrainClassFilePaths)
 
-        noOfValidationFiles = int(len(datasetTrainClassFilePaths) / 100 * percentageOfValidationFiles)
-        datasetTrainClassFilePaths = datasetTrainClassFilePaths[ :noOfValidationFiles]
-        datasetValidationClassDirectory = os.path.join(datasetValidateDirectory, classDirectory)    
-        createDirectory(datasetValidationClassDirectory)           
-        moveFiles(datasetTrainClassFilePaths, datasetValidationClassDirectory)
+        for i in range(noOfFolds):
+            datasetValidateFoldValidateDirectory = datasetValidateFoldValidateDirectoryTemplate.replace("$", str(i))
+            datasetValidateFoldValidateClassDirectory = os.path.join(datasetValidateFoldValidateDirectory, classDirectory)
+            createDirectory(datasetValidateFoldValidateClassDirectory)
+
+            noOfClassFiles = round(len(datasetTrainClassFilePaths) / noOfFolds)
+            datasetValidateFoldValidatenClassFilePaths = datasetTrainClassFilePaths[(i * noOfClassFiles):((i+1) * noOfClassFiles)]
+            copyFiles(datasetValidateFoldValidatenClassFilePaths, datasetValidateFoldValidateClassDirectory)
+  
+            datasetValidateFoldTrainDirectory = datasetValidateFoldTrainDirectoryTemplate.replace("$", str(i))
+            datasetValidateFoldTrainClassDirectory = os.path.join(datasetValidateFoldTrainDirectory, classDirectory)
+            createDirectory(datasetValidateFoldTrainClassDirectory)
+
+            if i != 0:
+                datasetValidateFoldTrainClassFilePaths1 = datasetTrainClassFilePaths[ :(i * noOfClassFiles)]
+            else:
+                datasetValidateFoldTrainClassFilePaths1 = []
+            if i != noOfFolds-1:
+                datasetValidateFoldTrainClassFilePaths2 = datasetTrainClassFilePaths[((i+1) * noOfClassFiles): ]
+            else:
+                datasetValidateFoldTrainClassFilePaths2 = []
+            datasetValidateFoldTrainClassFilePaths = datasetValidateFoldTrainClassFilePaths1 + datasetValidateFoldTrainClassFilePaths2
+            copyFiles(datasetValidateFoldTrainClassFilePaths, datasetValidateFoldTrainClassDirectory)
 
 
 def recreatePredictDataDefault():

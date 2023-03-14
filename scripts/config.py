@@ -1,4 +1,4 @@
-# Load required modules
+# Install required packages
 import configparser
 import os
 
@@ -6,15 +6,18 @@ import os
 def initConfigFile(filePath="config.ini"):
     if not os.path.isfile(filePath):
         config = configparser.ConfigParser()
-        config["DIRECTORY"] = {"input": "../dataset-mardin/input",
-                               "inputPredict": "../dataset-mardin/input/predict",
-                               "inputTrain": "../dataset-mardin/input/train",
-                               "dataset": "../dataset-mardin/dataset",
-                               "datasetPredict": "../dataset-mardin/dataset/predict",
-                               "datasetPredictSubset": "../dataset-mardin/dataset/predict/subset$",
-                               "datasetValidate": "../dataset-mardin/dataset/validate",
-                               "datasetTrain": "../dataset-mardin/dataset/train",
-                               "datasetTest": "../dataset-mardin/dataset/test",
+        config["DIRECTORY"] = {"input": "input",
+                               "inputPredict": "../dataset-mardin-plain/base-dataset/predict",
+                               "inputTrain": "../dataset-mardin-plain/base-dataset/train",
+                               "dataset": "../dataset-mardin-plain",
+                               "datasetPredict": "../dataset-mardin-plain/training-dataset/predict",
+                               "datasetPredictSubset": "../dataset-mardin-plain/training-dataset/predict/subset$",
+                               "datasetValidate": "../dataset-mardin-plain/training-dataset/validate",
+                               "datasetValidateFold": "../dataset-mardin-plain/training-dataset/validate/fold$",    
+                               "datasetValidateFoldTrain": "../dataset-mardin-plain/training-dataset/validate/fold$/train",
+                               "datasetValidateFoldValidate": "../dataset-mardin-plain/training-dataset/validate/fold$/validate",                               
+                               "datasetTrain": "../dataset-mardin-plain/training-dataset/train",
+                               "datasetTest": "../dataset-mardin-plain/training-dataset/test",
                                "output": "output",
                                "outputTrain": "output/train",
                                "outputValidate": "output/validate",
@@ -22,9 +25,9 @@ def initConfigFile(filePath="config.ini"):
                                "outputPredict": "output/predict"}
 
         config["TRAIN"] = {"noOfTestFiles": "100",
-                           "percentageOfValidationFiles": "20",
+                           "noOfFolds": "5",
                            "shuffleFiles": "yes",
-                           "batchSize": "40"}
+                           "batchSize": "64"}
 
         config["PREDICT"] = {"maxfiles": "2000"}
                           
@@ -46,8 +49,8 @@ def getNoOfTestFiles():
     return int(readConfigFile("TRAIN", "noOfTestFiles"))
 
 
-def getPercentageOfValidationFiles():
-    return int(readConfigFile("TRAIN", "percentageOfValidationFiles"))
+def getNoOfFolds():
+    return int(readConfigFile("TRAIN", "noOfFolds"))
 
 
 def useShuffledFiles():
