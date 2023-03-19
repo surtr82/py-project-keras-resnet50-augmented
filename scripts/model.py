@@ -287,7 +287,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(learning_rate=0.00001),
+        optimizer = Adam(learning_rate=1e-5),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
@@ -421,7 +421,7 @@ def predictFiles(model, datasetPredictDirectory, width, height, depth):
             lon = float(lon)        
 
             # Get percentage
-            prct = (100 - (predictions[index,0] * 100))
+            prct = (predictions[index,0] * 100)
         except:
             name = 'Unknown'
             lat = 0.00
