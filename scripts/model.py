@@ -72,12 +72,15 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
         trainDataGenerator = ImageDataGenerator(
             preprocessing_function = preprocess_input,
             rotation_range=5,
-            zoom_range=[0.95, 1],
+            zoom_range=[0.98, 1],
+            # zoom_range=[0.95, 1],
             horizontal_flip=True, 
             # vertical_flip=True,
-            width_shift_range=0.05,
-            height_shift_range=0.1,
-            brightness_range=[0.7, 1.0],
+            width_shift_range=0.02,
+            height_shift_range=0.02,
+            # width_shift_range=0.05,
+            # height_shift_range=0.05,            
+            # brightness_range=[0.95, 1.0],
             fill_mode="constant",
             cval=75
         )
@@ -218,16 +221,19 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
 
     # Process train files
     trainDataGenerator = ImageDataGenerator(
-        preprocessing_function = preprocess_input,
-        rotation_range=5,
-        zoom_range=[0.95, 1],
-        horizontal_flip=True, 
-        # vertical_flip=True,
-        width_shift_range=0.05,
-        height_shift_range=0.1,
-        brightness_range=[0.7, 1.0],
-        fill_mode="constant",
-        cval=75
+            preprocessing_function = preprocess_input,
+            rotation_range=5,
+            zoom_range=[0.98, 1],
+            # zoom_range=[0.95, 1],
+            horizontal_flip=True, 
+            # vertical_flip=True,
+            width_shift_range=0.02,
+            height_shift_range=0.02,
+            # width_shift_range=0.05,
+            # height_shift_range=0.05,            
+            # brightness_range=[0.95, 1.0],
+            fill_mode="constant",
+            cval=75
     )
 
     trainDataGenerator.mean = mean
