@@ -76,16 +76,14 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
             # zoom_range=[0.95, 1],
             horizontal_flip=True, 
             # vertical_flip=True,
-            width_shift_range=0.02,
-            height_shift_range=0.02,
-            # width_shift_range=0.05,
-            # height_shift_range=0.05,            
+            width_shift_range=0.05,
+            height_shift_range=0.05,            
             # brightness_range=[0.95, 1.0],
             fill_mode="constant",
             cval=75
         )
 
-        trainDataGenerator.mean = mean
+        # trainDataGenerator.mean = mean
         trainDirectory = datasetValidateFoldTrainDirectory.replace("$", str(i))
         trainData = trainDataGenerator.flow_from_directory(
             trainDirectory,
@@ -101,7 +99,7 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
             preprocessing_function = preprocess_input
         )
 
-        validateDataGenerator.mean = mean
+        # validateDataGenerator.mean = mean
         validateDirectory = datasetValidateFoldValidateDirectory.replace("$", str(i))
         validateData = validateDataGenerator.flow_from_directory(
             validateDirectory,
@@ -227,16 +225,14 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
             # zoom_range=[0.95, 1],
             horizontal_flip=True, 
             # vertical_flip=True,
-            width_shift_range=0.02,
-            height_shift_range=0.02,
-            # width_shift_range=0.05,
-            # height_shift_range=0.05,            
+            width_shift_range=0.05,
+            height_shift_range=0.05,            
             # brightness_range=[0.95, 1.0],
             fill_mode="constant",
             cval=75
     )
 
-    trainDataGenerator.mean = mean
+    # trainDataGenerator.mean = mean
     trainData = trainDataGenerator.flow_from_directory(
         datasetTrainDirectory,
         batch_size = batchSize,
@@ -293,7 +289,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(learning_rate=1e-5),
+        optimizer = Adam(learning_rate=2e-5),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )

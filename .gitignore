@@ -5,6 +5,9 @@ __pycache__/
 env/
 
 
+# Ignore files
+libdevice.10.bc
+
 # Ignore extensions
 *.h5
 *.csv
