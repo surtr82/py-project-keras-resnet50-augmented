@@ -111,7 +111,7 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
         )
 
         # Define steps per epoch
-        epochs = 30
+        epochs = 100
         trainStepsPerEpoch = int(trainData.n / batchSize)   
         validateStepsPerEpcoh = int(validateData.n / batchSize)     
 
@@ -243,7 +243,7 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
     )
 
     # Define steps per epoch
-    epochs = 30
+    epochs = 100
     trainStepsPerEpoch = int(trainData.n / batchSize)
                 
     # Build model
@@ -268,7 +268,8 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     modelBase = getModelBase(width, height, depth)
 
     # Freeze layers of base model which wont get updated during training
-    freezeLayers = 143
+    #freezeLayers = 143
+    freezeLayers = 81
     for layer in modelBase.layers[:freezeLayers]:
         layer.trainable = False
     for layer in modelBase.layers[freezeLayers:]:
@@ -289,7 +290,7 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
 
     # Compile the model
     model.compile(
-        optimizer = Adam(learning_rate=2e-5),
+        optimizer = Adam(learning_rate=1e-5),
         loss = "binary_crossentropy",
         metrics = ["accuracy"],
     )
