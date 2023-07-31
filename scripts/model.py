@@ -72,8 +72,7 @@ def executeCrossValidation(datasetValidateFoldTrainDirectory, datasetValidateFol
         trainDataGenerator = ImageDataGenerator(
             preprocessing_function = preprocess_input,
             rotation_range=5,
-            zoom_range=[0.98, 1],
-            # zoom_range=[0.95, 1],
+            zoom_range=[0.95, 1],
             horizontal_flip=True, 
             # vertical_flip=True,
             width_shift_range=0.05,
@@ -221,8 +220,7 @@ def trainFinalModel(datasetTrainDirectory, datasetValidateDirectory, outputTrain
     trainDataGenerator = ImageDataGenerator(
             preprocessing_function = preprocess_input,
             rotation_range=5,
-            zoom_range=[0.98, 1],
-            # zoom_range=[0.95, 1],
+            zoom_range=[0.95, 1],
             horizontal_flip=True, 
             # vertical_flip=True,
             width_shift_range=0.05,
@@ -268,7 +266,6 @@ def buildModel(width, height, depth, trainData, epochs, trainStepsPerEpoch, vali
     modelBase = getModelBase(width, height, depth)
 
     # Freeze layers of base model which wont get updated during training
-    #freezeLayers = 143
     freezeLayers = 81
     for layer in modelBase.layers[:freezeLayers]:
         layer.trainable = False
