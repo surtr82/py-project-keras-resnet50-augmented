@@ -57,8 +57,8 @@ def visualizePredictions(model, filePath, width, height, minPercentage, outputPr
 
 def visualizeGradCam(model, layerName, filePath, width, height, outputPredictDirectory, classIndex=0):
     img = loadImage(filePath, height, width)
-    gradcam = computeGradCam(model, img, width, height, classIndex, layerName)
-    #gradcam = computeGradCamPlus(model, img, width, height, classIndex, layerName)
+    #gradcam = computeGradCam(model, img, width, height, classIndex, layerName)
+    gradcam = computeGradCamPlus(model, img, width, height, classIndex, layerName)
     jetcam = computeJetCam(gradcam, filePath, width, height)
     cv2.imwrite(os.path.join(outputPredictDirectory, os.path.basename(filePath)), jetcam)
     
