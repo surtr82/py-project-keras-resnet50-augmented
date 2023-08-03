@@ -1,4 +1,3 @@
-
 # Load required packages
 import sys
 sys.path.append('/env/lib/python3.6/site-packages')
@@ -122,8 +121,8 @@ def computeGradCamPlus(model, image, width, height, classIndex, layerName):
     # Passing through ReLU
     cam = np.maximum(grad_CAM_map, 0)
     cam = zoom(cam,height/cam.shape[0])
-    cam = cam / np.max(cam) # scale 0 to 1.0    
-    #cam = resize(cam, (224,224))
+    # scale 0 to 1.0
+    cam = cam / np.max(cam)
     return cam
 
 
@@ -132,5 +131,3 @@ def computeJetCam(gradcam, filePath, width, height):
     jetcam = (np.float32(jetcam) + loadImage(filePath, width, height, preprocess=False)) / 2
     jetcam = np.uint8(jetcam)
     return jetcam
-
-
